@@ -8,7 +8,8 @@ c = 3e8 # speed of light in a vacuum
 
 # get top 2 highest amps and their corresponding ToFs
 def get_max_amps(df):
-    # find peaks and get average n and p across all channels for the signal
+    # find peaks and get n and p across all channels for this signal
+    # update: treat each channel as a sample for NN
     results_n = []
     results_p = []
     signal = df.drop(columns=["time"])
@@ -27,16 +28,14 @@ def get_max_amps(df):
             a1 = x[idx1]
             a2 = x[idx2]
 
-            # calc this channel n and p so can avg them later
+            # calc this channel n and p
             n = calc_RI(t1, t2)
             results_n.append(n)
 
             p = calc_RAR(a1, a2)
             results_p.append(p)
 
-    avg_n = np.mean(results_n)
-    avg_p = np.mean(results_p)
-    return avg_n, avg_p
+    return results_n, results_p
 
 # RI or n caclulation using formula defined in paper
 def calc_RI(t1, t2):
@@ -47,27 +46,30 @@ def calc_RAR(a1, a2):
     return a2 / a1
 
 def main():
-    # read dry soil csvs
-    n_dry = np.zeros(10)
-    p_dry = np.zeros(10)
+    # read dry soil csvs (for all 10 signals)
+    n_dry = []
+    p_dry = []
     for i in range(10):
         print(f"------------CAPTURE {i}------------")
         df = pd.read_csv(f"./Walabot-Data-Saver/raw-signals/soil-capture_{i}_signals.csv")
-        avg_n, avg_p = get_max_amps(df)
-        n_dry[i] = avg_n
-        p_dry[i] = avg_p
-        print("dry", "n=", avg_n, "p=", avg_p)
+        all_n, all_p = get_max_amps(df)
+        n_dry += all_n
+        p_dry += all_p
         
     # read wet soil csvs
-    n_wet = np.zeros(10)
-    p_wet = np.zeros(10)
+    n_wet = []
+    p_wet = []
     for i in range(10):
         print(f"------------CAPTURE {i}------------")
         df = pd.read_csv(f"./Walabot-Data-Saver/raw-signals/wet-soil-capture_{i}_signals.csv")
-        avg_n, avg_p = get_max_amps(df)
-        n_wet[i] = avg_n
-        p_wet[i] = avg_p
-        print("wet", "n=", avg_n, "p=", avg_p)
+        all_n, all_p = get_max_amps(df)
+        n_wet += all_n
+        p_wet += all_p
+    
+    n_dry = np.asarray(n_dry)
+    p_dry = np.asarray(p_dry)
+    n_wet = np.asarray(n_wet)
+    p_wet = np.asarray(p_wet)
     
     print("n dry soil: ", n_dry)
     print("p dry soil: ", p_dry)
