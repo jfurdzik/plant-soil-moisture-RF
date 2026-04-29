@@ -3,6 +3,8 @@ from torch import nn
 import random
 import numpy as np
 
+K = 4 # sample size
+
 class SoilNet(nn.Module):
     def __init__(self):
         super().__init__()

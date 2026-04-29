@@ -63,7 +63,7 @@ class SoilDataset(Dataset):
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
 
-# sample K data points and create + return dataloader
+# sample K data points matching indices n and p and flatten/concat
 def sample_K(dataset):
     # need to get the same matching n and p elem
     idx = random.sample(range(len(dataset)))
